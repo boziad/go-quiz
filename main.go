@@ -39,23 +39,24 @@ func main() {
 	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 
 	for i, p := range probelms {
+		fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
+		answerCh := make(chan string)
+		go func() {
+			var answer string
+			fmt.Scanf("%s\n", &answer)
+			answerCh <- answer
+		}()
 		select {
 		case <-timer.C:
 			fmt.Println("You ran out of time")
 			log.Fatalf("You scored %d out of %d\n", correct, len(probelms))
-		default:
-			fmt.Printf("Problem #%d: %s = \n", i+1, p.q)
-			var answer string
-			fmt.Scanf("%s\n", &answer)
+		case answer := <-answerCh:
 			if answer == p.a {
 				correct++
 			}
 		}
-
 	}
-
 	fmt.Printf("You scored %d out of %d\n", correct, len(probelms))
-
 }
 
 func parseLines(lines [][]string) (ret []Problem) {
@@ -64,7 +65,6 @@ func parseLines(lines [][]string) (ret []Problem) {
 	for i, line := range lines {
 		ret[i] = Problem{q: line[0], a: strings.TrimSpace(line[1])}
 	}
-
 	return
 
 }
